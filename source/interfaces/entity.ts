@@ -1,31 +1,33 @@
 import { GameObjects } from 'phaser'
 
-export enum EntityType {
-    HUMAN,
-    SPACE_SHIP,
-    ALIEN
+export namespace StaticValue {
+    export enum EntityType {
+        HUMAN,
+        SPACE_SHIP,
+        ALIEN
+    }
+    
+    export enum EntityState {
+        IDLE,
+        MOVING
+    }
+    
+    export enum EntityDirection {
+        LEFT,
+        RIGHT
+    }
 }
 
-export enum EntityState {
-    IDLE,
-    MOVING
-}
 
-export enum EntityDirection {
-    LEFT,
-    RIGHT
-}
-
-
-
-export interface Entity {
+export interface IEntity {
     position : Phaser.Math.Vector2,
-    type : EntityType,
-    state : EntityState,
-    direction : EntityDirection,
-    view : GameObjects.Sprite
-    setState(state : EntityState) : void
-    setDirection(direction : EntityDirection) : void
+    type : StaticValue.EntityType,
+    state : StaticValue.EntityState,
+    direction : StaticValue.EntityDirection,
+    view : Phaser.GameObjects.Sprite | Phaser.GameObjects.Container,
+    updated : boolean
+    setState(state : StaticValue.EntityState) : void
+    setDirection(direction : StaticValue.EntityDirection) : void
     setPosition(position : Phaser.Math.Vector2) : void
     update() : void
 }

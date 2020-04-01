@@ -1,12 +1,13 @@
 import { Game, Scene, Math } from 'phaser'
+import { StaticValue} from './interfaces/entity'
+import StreetLamp from './entities/streetlamp3'
+import Human from './entities/human'
 
-import { Human } from './entities/human'
-import { EntityDirection } from './interfaces/entity'
 
 const svgToDataurl = require('svg-to-dataurl')
 
 let human: any = null
-let a: Human, b: Human
+let a: Human, b: Human, c : StreetLamp
 let entity: any = 1
 let headColor: any = `#feeedf
 #f0dcd0
@@ -32,11 +33,6 @@ console.log(headColor)
 export default class Main extends Scene {
     constructor() {
         super("main")
-    }
-
-    preload(): void {
-        this.load.image('HUMAN_DOS', "humain-de-dos.svg")
-        this.load.svg('HUMAN', "humain.svg", { scale: 2, })
     }
 
     getPlayerEntitiesBase64(head: string, callback: Function): void {
@@ -79,25 +75,30 @@ export default class Main extends Scene {
     addPlayerEntity(headColor: string, callback: Function): void {
         this.getPlayerEntitiesBase64(headColor, (human: HTMLElement) => {
             this.addPlayerEntityTexture(human, (textureId: string) => {
-
                 callback(textureId)
-
             })
-
         })
     }
 
+    preload(): void {
+        this.load.image("street_lamp_body", "street_lamp_body.png")
+        this.load.image("street_lamp_light", "street_lamp_light.png")
+    }
+
     create(): void {
-        a = new Human(this, headColor[Math.Between(0, headColor.length - 1)])
-        b = new Human(this, headColor[Math.Between(0, headColor.length - 1)])
-        a.setDirection(EntityDirection.RIGHT)
-        a.setPosition(new Phaser.Math.Vector2(200, 100))
-        b.setPosition(new Phaser.Math.Vector2(300, 100))
+       
+
+        c = new StreetLamp(this, "null")
+        c.lampBody.setOrigin(0)
+        c.setPosition(new Phaser.Math.Vector2(300, 20))
+        c.update()
+        console.log(c)
+
+
     }
 
     update(): void {
-        a.update()
-        b.update()
+         c.update()
 
     }
 }

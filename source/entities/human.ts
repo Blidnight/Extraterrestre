@@ -1,46 +1,28 @@
-import { Entity, EntityState, EntityType, EntityDirection} from '../interfaces/entity'
-
-import { GameObjects, Scene } from 'phaser'
+import Entity from './entity'
 
 import Main from '../main'
 
+import { StaticValue } from '../interfaces/entity'
 
-export class Human implements Entity {
-    position : Phaser.Math.Vector2 = new Phaser.Math.Vector2(0, 0)
-    type : EntityType = EntityType.HUMAN
-    state : EntityState = EntityState.IDLE
-    direction : EntityDirection = EntityDirection.LEFT
-    view : GameObjects.Sprite 
-    viewReady : boolean = false
+export default class Human extends Entity {
+    
+    view : Phaser.GameObjects.Sprite 
 
     constructor(scene : Main, texture : string) {
+        super()
         scene.addPlayerEntity(texture, (texture: string) => {
-           this.view = new GameObjects.Sprite(scene, 0, 0, texture)
+           this.view = new Phaser.GameObjects.Sprite(scene, 0, 0, texture)
            scene.add.existing(this.view)
            this.viewReady = true
         })
     }
 
-    setState(state : EntityState) : void {
-        this.state = state
-    }
-
-    setDirection(direction : EntityDirection) : void {
-        this.direction = direction
-    }
-
-    setPosition(position : Phaser.Math.Vector2) : void {
-        this.position = position
-    }
-
     update() : void {
-        if (this.viewReady) {
+        if (this.viewReady && !this.updated) {
             this.view.x = this.position.x
             this.view.y = this.position.y
-            this.view.setFlipX(this.direction === EntityDirection.LEFT ? true : false)
+            this.view.setFlipX(this.direction === StaticValue.EntityDirection.LEFT ? true : false)
+            this.updated = true
         }
     }
-
-
-
 }

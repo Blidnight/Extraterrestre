@@ -1,4 +1,4 @@
-import { Entity } from './entity'
+import { IEntity } from './entity'
 
 export interface Human {
     
