@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "webpack-dev-server --hot"
   },
   "keywords": [],
   "author": "Blidnight",
@@ -28,6 +28,9 @@
     "@babel/plugin-transform-classes": "^7.9.2",
     "@babel/plugin-transform-runtime": "^7.9.0",
     "@babel/runtime": "^7.9.2",
-    "html-webpack-plugin": "^4.0.3"
+    "base64-img": "^1.0.4",
+    "html-webpack-plugin": "^4.0.3",
+    "phaser": "^3.22.0",
+    "svg-to-dataurl": "^1.0.0"
   }
 }

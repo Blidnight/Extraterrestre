@@ -1,0 +1,39 @@
+body{
+    margin : 0;
+    padding : 0;
+}
+
+.image-uploader, .image {
+    display : flex;
+}
+
+.image {
+    justify-content: center;
+    align-items: center;
+}
+
+.image-uploader {
+    justify-content: space-between;
+}
+
+
+.image-uploader {
+    width : 650px;
+    margin : 0 auto;
+    flex-wrap : wrap;
+}
+
+.image {
+    margin-bottom: 10px;
+    width : 200px;
+    height: 200px;
+    background-color: #ccc;
+}
+
+.plus {
+    display : none;
+}
+
+.image:nth-last-child(1) .plus  {
+    display : block;
+}
