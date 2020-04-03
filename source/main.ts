@@ -11,25 +11,6 @@ import EntityTexturemanager from './manager/entityTextureManager'
 
 let a: Human, b: Human, c: StreetLamp
 let entities: Array<Entity> = []
-let headColor: any = `#feeedf
-#f0dcd0
-#e2bc9d
-#eaaf98
-#c7aa95
-#b0896d
-#c5a198
-#a47562
-#b47351
-#a2704b
-#936d52
-#765842
-#62493e
-#534438
-#7f432e
-#6e3026
-#532f18
-#452208`.split('\n')
-console.log(headColor)
 
 
 export default class Main extends Scene implements IMainScene {
@@ -55,12 +36,11 @@ export default class Main extends Scene implements IMainScene {
 
         this.entityTextureManager = new EntityTexturemanager(this)
         this.entityTextureManager.addPlayerEntity("red", (textures : any) => {
-            this.sceneState = new IntroductionSceneState(this)
-            this.sceneState.renderSteps(0)
-
+            this.entityTextureManager.addSpaceShipEntity("blue", (textures : any) => {
+                this.sceneState = new IntroductionSceneState(this)
+                this.sceneState.renderSteps(0)
+            })
         })
-        
-        
         
     }
 

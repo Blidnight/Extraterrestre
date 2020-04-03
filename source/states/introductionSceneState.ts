@@ -6,6 +6,25 @@ import Human from '../entities/human';
 import Bulb from '../entities/bulb'
 import Spaceship from '../entities/spaceship';
 
+const headColor: any = `#feeedf
+#f0dcd0
+#e2bc9d
+#eaaf98
+#c7aa95
+#b0896d
+#c5a198
+#a47562
+#b47351
+#a2704b
+#936d52
+#765842
+#62493e
+#534438
+#7f432e
+#6e3026
+#532f18
+#452208`.split('\n')
+
 
 export default class IntroductionSceneState extends SceneState {
     stepsDuration : number = null
