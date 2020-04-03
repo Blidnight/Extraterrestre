@@ -9,6 +9,7 @@ export default abstract class Entity implements IEntity {
     view: any
     viewReady: boolean = false
     updated: boolean = true
+    onInterpolation : boolean = false
 
     setState(state: StaticValue.EntityState): void {
         this.state = state

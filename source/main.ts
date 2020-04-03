@@ -1,14 +1,16 @@
 import { Game, Scene, Math } from 'phaser'
-import { StaticValue} from './interfaces/entity'
+import { StaticValue } from './interfaces/entity'
+import IntroductionSceneState from './states/introductionSceneState'
+import IMainScene from './interfaces/mainScene'
 import StreetLamp from './entities/streetlamp3'
 import Human from './entities/human'
+import Entity from './entities/entity'
+import Spaceship from './entities/spaceship'
+import "./css/index.css"
+import EntityTexturemanager from './manager/entityTextureManager'
 
-
-const svgToDataurl = require('svg-to-dataurl')
-
-let human: any = null
-let a: Human, b: Human, c : StreetLamp
-let entity: any = 1
+let a: Human, b: Human, c: StreetLamp
+let entities: Array<Entity> = []
 let headColor: any = `#feeedf
 #f0dcd0
 #e2bc9d
@@ -30,82 +32,51 @@ let headColor: any = `#feeedf
 console.log(headColor)
 
 
-export default class Main extends Scene {
+export default class Main extends Scene implements IMainScene {
+    entityTextureManager : EntityTexturemanager
+    sceneState : IntroductionSceneState
+
     constructor() {
         super("main")
-    }
-
-    getPlayerEntitiesBase64(head: string, callback: Function): void {
-        if (human === null) {
-            let xhr = new XMLHttpRequest()
-            xhr.open('get', "humain.svg")
-            xhr.onreadystatechange = () => {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    human = <HTMLElement>document.createElement('div')
-                    human.innerHTML = xhr.responseText
-                    human.querySelector('.st2').style.fill = head
-                    callback(human)
-                }
-            }
-            xhr.send(null)
-        } else {
-            console.log("Existed Source")
-            human.querySelector('.st2').style.fill = head
-            callback(human)
-        }
-    }
-
-    addPlayerEntityTexture(svg: HTMLElement, callback: Function) {
-        let canvas = document.createElement('canvas')
-        let context = canvas.getContext('2d')
-        let image = new Image()
-        image.src = svgToDataurl(svg.innerHTML)
-        image.width = canvas.width = 100
-        image.height = canvas.height = 200
-        image.onload = () => {
-            context.drawImage(image, 0, 0)
-            entity += 1
-            let current = `entity${entity}`
-            this.textures.addBase64(`entity${entity}`, canvas.toDataURL('image/png')).on('addtexture', (e: any) => {
-                if (e === current) callback(current)
-            })
-        }
-    }
-
-    addPlayerEntity(headColor: string, callback: Function): void {
-        this.getPlayerEntitiesBase64(headColor, (human: HTMLElement) => {
-            this.addPlayerEntityTexture(human, (textureId: string) => {
-                callback(textureId)
-            })
-        })
     }
 
     preload(): void {
         this.load.image("street_lamp_body", "street_lamp_body.png")
         this.load.image("street_lamp_light", "street_lamp_light.png")
+        this.load.image("starry_night", "starry_night.png")
+        this.load.image("building", "building.png")
+        this.load.image("ground", "ground.png")
     }
 
     create(): void {
-       
+        this.add.image(0, 0, "starry_night").setOrigin(0).setDepth(0)
+        this.add.image(0, config.height - 280, "building").setOrigin(0).setDepth(0)
+        this.add.image(0, config.height - 95, "ground").setOrigin(0).setDepth(0)
 
-        c = new StreetLamp(this, "null")
-        c.lampBody.setOrigin(0)
-        c.setPosition(new Phaser.Math.Vector2(300, 20))
-        c.update()
-        console.log(c)
+        this.entityTextureManager = new EntityTexturemanager(this)
+        this.entityTextureManager.addPlayerEntity("red", (textures : any) => {
+            this.sceneState = new IntroductionSceneState(this)
+            this.sceneState.renderSteps(0)
 
-
+        })
+        
+        
+        
     }
 
     update(): void {
-         c.update()
+        entities.forEach((entity: Entity) => {
+            entity.update()
+        })
+
+        if (this.sceneState !== undefined) this.sceneState.update()
 
     }
 }
 
 const config: any = {
-    width: window.innerWidth,
-    height: window.innerHeight,
+    width: 800,
+    height: 600,
     scene: [Main]
 }
 
