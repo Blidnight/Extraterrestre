@@ -5,7 +5,7 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "strict": true,
+    "strict": false,
     "strictNullChecks": false,
     "isolatedModules": false,
     "esModuleInterop": true,

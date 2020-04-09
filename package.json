@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "webpack-dev-server --hot"
+    "test": "webpack-dev-server --hot",
+    "build" : "webpack --mode development"
   },
   "keywords": [],
   "author": "Blidnight",
