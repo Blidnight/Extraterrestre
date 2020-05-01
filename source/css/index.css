@@ -1,4 +1,4 @@
-html, body {
+html, body, .image_preview {
     min-height: 100%;
     padding-bottom: 20px;
     font-family: 'Open Sans', sans-serif;
@@ -15,11 +15,11 @@ html, body {
     margin: 40px 0px;
 }
 
-.top, .playButton {
+.top, .playButton, .image_preview {
     display: flex;
 }
 
-.top, .playButton {
+.top, .playButton, .image_preview {
     align-items: center;
     justify-content: center;
 }
@@ -29,14 +29,37 @@ html, body {
     margin: 20px 0px;
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    height : 149px;
     flex-wrap: wrap;
 }
 
 .image {
     width: 23%;
-    height: 100px;
+    height: 139px;
     margin-bottom: 10px;
     background-color: #ccc;
+    background-repeat:  no-repeat;
+    background-size : cover;
+}
+
+.image_preview {
+    position: fixed;
+    z-index : 100000;
+    background-color: rgba(0, 0, 0, 0.6);
+    width : 100%;
+    top: 0;
+}
+
+.image_preview img {
+    position : relative;
+    width : 70%;
+    max-width : 800px;
+}
+
+.image:hover {
+    opacity: 0.8;
+    border: 2px solid white;
 }
 
 .description {
@@ -93,7 +116,7 @@ tr.player td {
     background-color: #33c9ff26;
 }
 
-#game canvas {
+canvas {
     width : 100%;
     height : 100%;
 }

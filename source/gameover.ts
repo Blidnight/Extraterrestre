@@ -1,3 +1,7 @@
+// @ts-nocheck
+
+import * as Phaser from 'phaser/dist/phaser.min.js'
+
 const headColor: Array<string> = `#feeedf
 #f0dcd0
 #e2bc9d
@@ -97,7 +101,7 @@ export default class GameOver extends Phaser.Scene {
         spaceship.play(`${spaceShipColor[0]}-moving`)
         rejouerBouton.x += spaceship.width / 2
         rejouerBouton.y -= (spaceship.height / 2 + 70)
-        rejouerBouton.setInteractive()
+        rejouerBouton.setInteractive({useHandCursor : true})
         rejouerBouton.on('pointerdown', () => {
             this.scene.start('play')
         })

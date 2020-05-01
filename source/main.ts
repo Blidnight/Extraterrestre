@@ -1,46 +1,18 @@
-import 'phaser/dist/phaser.min.js'
+// @ts-nocheck
+
+import * as Phaser from 'phaser/dist/phaser.min.js'
 
 import EntityTextureManager from './manager/textureManager'
 
-import Play from './play'
+import IntroductionScene from './introduction'
 
 import GameOver from './gameover'
 
+import Play from './play'
+
+import { shirtColor, spaceShipColor, headColor } from './data/color'
+
 import "./css/index.css"
-
-const SVGToDataURL: any = require('svg-to-dataurl')
-
-const headColor: Array<string> = `#feeedf
-#f0dcd0
-#e2bc9d
-#eaaf98
-#c7aa95
-#b0896d
-#c5a198
-#a47562
-#b47351
-#a2704b
-#936d52
-#765842
-#62493e
-#534438
-#7f432e
-#6e3026
-#532f18
-#452208`.split('\n')
-
-const shirtColor: Array<string> = `#f44336
-#e91e63
-#9c27b0
-#673ab7
-#3f51b5
-#607d8b`.split(`\n`)
-
-const spaceShipColor: Array<string> = `#43eafa
-#ff83f0
-#ffeb3b
-#ff450b
-#3050ff`.split('\n')
 
 class StreetLampEntity extends Phaser.GameObjects.Container {
     body: Phaser.GameObjects.Image
@@ -76,6 +48,8 @@ export default class Main extends Phaser.Scene {
 
     textureManager: EntityTextureManager = new EntityTextureManager(this)
 
+    soundButton : any
+
     constructor() {
         super("main")
     }
@@ -97,6 +71,8 @@ export default class Main extends Phaser.Scene {
         this.load.image("nuage2", "nuage2.png")
         this.load.image("arme", "arme.svg")
         this.load.image("joueur", "joueur.svg")
+        this.load.image("bulle-warning", "bulle-attention.png")
+        this.load.image("vaisseau-fond", "vaisseau-fond.png")
         this.load.image("titre", "titre.png")
         this.load.image("background", "background.png")
         this.load.image("bt-jouer", "bt-jouer.png")
@@ -106,10 +82,13 @@ export default class Main extends Phaser.Scene {
         this.load.audio('gun_reload', ["reload.mp3"])
         this.load.audio('degats', ['degats.wav'])
         this.load.atlas('flares', 'flares.png', 'flares.json');
+        this.load.image("arrow", "arrow.png")
         this.load.spritesheet("smoke", "smoke.png", {frameWidth : 58 / 3, frameHeight : 98})
+        this.load.image("son", "son.png")
     }
 
     createBackground(): void {
+        
         this.add.image(0, 0, "starry_night").setOrigin(0).setDepth(0)
         this.add.image(0, config.height - 280, "building").setOrigin(0).setDepth(0)
         this.add.image(0, 482, "buisson1")
@@ -120,13 +99,23 @@ export default class Main extends Phaser.Scene {
         this.add.image(800 - 100, 482, "buisson1")
         this.add.image(0, config.height - 95, "ground").setOrigin(0).setDepth(0)
 
+        this.soundButton = this.add.image(config.width - 30, config.height - 30, "son").setDisplaySize(40, 40)
+
+        this.soundButton.setDepth(192992929)
+
+        this.soundButton.setInteractive({useHandCursor : true})
+
+        this.soundButton.on('pointerdown', () => {
+            this.sound.mute = !this.sound.mute
+        })
+
     }
     
     createMenue() : void {
         let scene = this
 
         function startScene() : void {
-            scene.scene.start("play")
+            scene.scene.start("introduction")
         }
         this.createBackground()
         new StreetLampEntity(this, 0, 340)
@@ -141,7 +130,9 @@ export default class Main extends Phaser.Scene {
 
         let play =this.add.image(config.width / 2 - 70, config.height / 2 + 120, "bt-jouer")
 
-        play.setInteractive()
+        
+      
+        play.setInteractive({useHandCursor : true})
         play.on('pointerover', () => {
             play.alpha = 0.6
         })
@@ -174,7 +165,16 @@ export default class Main extends Phaser.Scene {
     }
 
     create(): void {
-
+        this.input.setPollAlways();
+        this.scale.startFullscreen()
+        document.body.style.height = "auto"
+        document.querySelector("html").style.height = "auto"
+        document.querySelector('.playButton').onclick = () => {
+            document.body.style.height = "100%"
+            document.querySelector("html").style.height = "100%"
+            document.querySelector('canvas').style.display = "block"
+            if (!this.scale.isFullscreen) this.scale.startFullscreen()
+        }
 
         let loadingText = this.add.text(config.width / 2, config.height / 2, "Image Generated : 0").setOrigin(0.5)
         let generatedImages = 0
@@ -186,7 +186,7 @@ export default class Main extends Phaser.Scene {
 
                         loadedF += 1
 
-                        console.log(textures)
+                        //onsole.log(textures)
 
                         generatedImages += 1
 
@@ -194,7 +194,6 @@ export default class Main extends Phaser.Scene {
 
                         if (loadedF === (headColor.length * shirtColor.length) + spaceShipColor.length) {
                             this.createMenue()
-                            
                         }
                     })
                 })
@@ -234,9 +233,12 @@ export default class Main extends Phaser.Scene {
 
     }
 
-    update(): void {
-
-
+    update(time : number, delta : number): void {
+        console.log(this.input.x, this.input.y, this.world)
+        this.input.updatePoll(time, delta)
+        if(this.soundButton === undefined) return
+        if (this.sound.mute) this.soundButton.alpha = 0.2
+        else this.soundButton.alpha = 1
 
     }
 }
@@ -244,8 +246,13 @@ export default class Main extends Phaser.Scene {
 const config: any = {
     width: 800,
     height: 600,
-    scene: [Main, Play, GameOver],
-    parent : "game",
+    scene: [Main, IntroductionScene, Play, GameOver],
+    scale: {
+        mode: Phaser.Scale.ENVELOPE,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        width: 800,
+        height: 630
+    },
     physics: {
         default: 'arcade',
         arcade: {
@@ -258,3 +265,26 @@ const config: any = {
 }
 
 const game: Phaser.Game = new Phaser.Game(config)
+const image_preview = <HTMLElement>document.querySelector('.image_preview')
+const captures = Array.from(document.querySelector('.galerie').children)
+
+image_preview.onclick = (e) => {
+   
+    image_preview.style.display = "none"
+}
+
+image_preview.querySelector('img').onclick = (e) => {
+    e.stopPropagation()
+}
+
+captures.forEach((capture : any) => {
+    capture.onclick = (e : any) => {
+        let id = e.target.id
+        image_preview.querySelector('img').src = `${id}.png`
+        image_preview.style.display = "flex"
+    }
+})
+
+setInterval(() => {
+    let canvas = Array.from(document.querySelectorAll('canvas'))
+})

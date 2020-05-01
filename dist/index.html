@@ -1,53 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <meta name="viewport" content="width=1050, user-scalable=no”">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@669&display=swap" rel="stylesheet">
+    <title>Document</title>
     <style>
         body {
-            margin : 0; padding : 0;
-            background-image : url("background.png");
-            background-size : 100% 100%;
+            margin: 0;
+            padding: 0;
+            background-image: url("background.png");
+            background-size: 100% 100%;
             background-repeat: no-repeat;
         }
+
+
+        .galerie .image:nth-child(1) {
+            background-image: url("capt-1.png")
+        }
+
+        .galerie .image:nth-child(2) {
+            background-image: url("capt-2.png")
+        }
+
+        .galerie .image:nth-child(3) {
+            background-image: url("capt-3.png")
+        }
+
+        .galerie .image:nth-child(4) {
+            background-image: url("capt-4.png")
+        }
+        canvas {
+            display: none;
+        }
     </style>
+
 </head>
-<body>
-<div class="container">
-    <div class="top">
-        <img src="titre.png" alt="Titre du jeu">
-    </div>
-    <div class="main">
-        <div class="description">
-            <b>ET, don't touch humans</b> est un jeu de tir à la 3eme personne où des extraterrestres viennent envahir la planète.<br/><br/>
-            Des soucoupes volantes arrivent et tentent de capturer des êtres humains en les aspirant dans leur faiscenau lumineux. Empêchez les d'éradiquer l'espèce humaine en tirant avec votre arme ! <br/><br/>
-            Attention, le jeu devient de plus en plus difficile au fil du temps.
-        </div>
-    </div>
-    <div class="galerie">
-        <div class="image">
 
+<body style="height : auto;">
+    <div class="container">
+        <div class="top">
+            <img src="titre.png" alt="Titre du jeu">
         </div>
-        <div class="image">
+        <div class="main">
+            <div class="description">
+                <b>ET, don't touch humans</b> est un jeu de tir à la 3eme personne où des extraterrestres viennent
+                envahir la planète.<br /><br />
+                Des soucoupes volantes arrivent et tentent de capturer des êtres humains en les aspirant dans leur
+                faiscenau lumineux. Empêchez les d'éradiquer l'espèce humaine en tirant avec votre arme ! <br /><br />
+                Attention, le jeu devient de plus en plus difficile au fil du temps.
+            </div>
+        </div>
+        <div class="galerie">
+            <div class="image" id="capt-1">
 
-        </div>
-        <div class="image">
+            </div>
+            <div class="image" id="capt-2">
 
-        </div>
-        <div class="image">
+            </div>
+            <div class="image" id="capt-3">
 
+            </div>
+            <div class="image" id="capt-4">
+
+            </div>
         </div>
+        <div id="game">
+             <div class="playButton">Jouer</div>
+        </div>
+        <div class="classment">
+            <p>Jeu par Blidnight et HeroySake</p>
+        </div>
+
     </div>
-    <div id="game">
 
+    <div class="image_preview" style="display:none;">
+        <img src="capt-1.png" alt="Capture1">
     </div>
-    <div class="classment">
-        <p>Jeux par Blidnight et HeroySake</p>
-    </div>
-    
-</div>
 <script src="main.js"></script></body>
+
 </html>

@@ -1,3 +1,7 @@
+// @ts-nocheck
+
+import * as Phaser from 'phaser/dist/phaser.min.js'
+
 const headColor: Array<string> = `#feeedf
 #f0dcd0
 #e2bc9d
@@ -123,14 +127,17 @@ class HumanWarriorEntity extends Phaser.Physics.Arcade.Image {
     controls: any
     weapon: Phaser.Physics.Arcade.Image
     data: any
+    moveLeft: boolean = false
+    moveRight: boolean = false
     reload: boolean = false
     reloadShape: any
     onAnimationReload: boolean = false
+    pointerOnHeroe: boolean = false
     constructor(scene: Phaser.Scene, x: number, y: number) {
         super(scene, x, y, "joueur")
         let play = scene as Play
         this.setDepth(1000)
-        let playerSettings = this.scene.add.text(20, config.height - 38, '', { fontFamily: 'Orbitron', color: "#000", fontSize: 18 }).setAlpha(0.6)
+        let playerSettings = this.scene.add.text(20, config.height - 38, '', { fontFamily: 'Orbitron', color: "#000", fontSize: 15 }).setAlpha(0.6)
         this.reloadShape = this.scene.add.rectangle(this.x, this.y, 100, 10, 0xFFf)
         this.reloadShape.setVisible(false)
         this.setDataEnabled()
@@ -138,6 +145,15 @@ class HumanWarriorEntity extends Phaser.Physics.Arcade.Image {
         this.data.set("chargeur", 50)
         this.data.set("kills", 0)
         this.data.set("captures", 0)
+
+        this.setInteractive()
+
+        this.on('pointerover', () => {
+            this.pointerOnHeroe = true
+        })
+        this.on('pointerout', () => {
+            this.pointerOnHeroe = false
+        })
 
 
         playerSettings.setText(
@@ -159,12 +175,42 @@ class HumanWarriorEntity extends Phaser.Physics.Arcade.Image {
         this.weapon.setOrigin(0.7, 0.5)
         play.playerGroup.add(this)
 
-        this.scene.input.on('pointerup', () => {
+        let reloadKey: any = this.scene.input.keyboard.addKeys("R")
+        reloadKey.R.onDown = () => {
+            this.reload = true
+            let reloadSound = this.scene.sound.add("gun_reload", { volume: 0.5 })
+            reloadSound.play()
+
+        }
+
+        this.scene.input.on('pointerdown', () => {
+
+            let angle = Math.floor(Phaser.Math.RadToDeg(Phaser.Math.Angle.BetweenPoints(new Phaser.Geom.Point(this.scene.input.x, this.scene.input.y), { x: this.weapon.x, y: this.weapon.y })))
+
+            console.log("shoot")
+
+
+            this.weapon.x = this.x + (this.flipX ? -20 : 20)
+            this.weapon.y = this.y + 15
+
+
+            if (angle < 90 && angle > -90) {
+                
+                this.weapon.angle = angle
+                this.setFlipX(true)
+
+                this.weapon.setFlipY(false)
+            } else {
+               
+                this.setFlipX(false)
+                this.weapon.setFlipY(true)
+                this.weapon.angle = angle
+            }
 
 
             if (this.data.get('munitions') <= 0 && !this.reload) {
                 this.reload = true
-                let reloadSound = this.scene.sound.add("gun_reload")
+                let reloadSound = this.scene.sound.add("gun_reload", { volume: 0.5 })
                 reloadSound.play()
 
                 return
@@ -172,15 +218,19 @@ class HumanWarriorEntity extends Phaser.Physics.Arcade.Image {
                 return
             }
 
-            if (this.data.values.munitions === 20) {
-                let shootPower = this.scene.sound.add("gun_special_shoot")
-                shootPower.play()
-                new Bullet(this.scene, this.weapon.x, this.weapon.y, this.weapon.angle, "blue")
+            if (this.moveLeft || this.moveRight) return
 
-            } else {
-                let shootPower = this.scene.sound.add("gun_normal_shoot")
+            if (this.data.values.munitions === 20) {
+                let shootPower = this.scene.sound.add("gun_special_shoot", { volume: 0.2 })
                 shootPower.play()
                 new Bullet(this.scene, this.weapon.x, this.weapon.y, this.weapon.angle)
+               
+
+            } else {
+                let shootPower = this.scene.sound.add("gun_normal_shoot", { volume: 0.4 })
+                shootPower.play()
+                new Bullet(this.scene, this.weapon.x, this.weapon.y, this.weapon.angle)
+                
 
             }
 
@@ -203,6 +253,33 @@ class HumanWarriorEntity extends Phaser.Physics.Arcade.Image {
 
     registerEvents(): void {
         this.controls = this.scene.input.keyboard.addKeys("up, down, left, right, A, D, S, W, Z, Q")
+        let leftArrow = this.scene.add.image(20, config.height - 90, "arrow").setOrigin(0).setFlipX(true)
+        let rightArrow = this.scene.add.image(20 + leftArrow.width + 20, config.height - 90, "arrow").setOrigin(0)
+
+        rightArrow.setInteractive()
+        leftArrow.setInteractive()
+
+        rightArrow.on('pointerdown', () => {
+            this.moveRight = true
+        })
+
+        rightArrow.on('pointerup', () => {
+            this.moveRight = false
+        })
+
+        leftArrow.on('pointerdown', () => {
+            this.moveLeft = true
+        })
+
+        leftArrow.on('pointerup', () => {
+            this.moveLeft = false
+        })
+
+        this.scene.input.on('pointerup', () => {
+            if (this !== undefined)
+                this.moveLeft = false
+            this.moveRight = false
+        })
     }
 
     update(time: number, delta: number): void {
@@ -232,12 +309,21 @@ class HumanWarriorEntity extends Phaser.Physics.Arcade.Image {
             }
         }
 
-        if (this.controls.left.isDown || this.controls.Q.isDown || this.controls.A.isDown) {
+        if (this.controls.left.isDown || this.controls.Q.isDown || this.controls.A.isDown || this.moveLeft) {
             this.body.setVelocityX(-200)
         }
-        else if (this.controls.right.isDown || this.controls.D.isDown) {
+        else if (this.controls.right.isDown || this.controls.D.isDown || this.moveRight) {
             this.body.setVelocityX(200)
-        } else this.body.setVelocityX(0)
+        } else {
+            this.body.setVelocityX(0)
+            this.moveRight = false
+            this.moveLeft = false
+        }
+
+        if (this.body.velocity.x === 0) {
+            this.moveRight = false
+            this.moveLeft = false
+        }
 
         if ((this.controls.up.isDown || this.controls.W.isDown || this.controls.Z.isDown) && this.body.touching.down) {
             this.body.setVelocityY(-600)
@@ -247,24 +333,43 @@ class HumanWarriorEntity extends Phaser.Physics.Arcade.Image {
             this.body.velocity.y += delta
         }
 
-        let angle = Phaser.Math.RadToDeg(Phaser.Math.Angle.BetweenPoints(new Phaser.Geom.Point(this.scene.input.x, this.scene.input.y), { x: this.weapon.x, y: this.weapon.y }))
-
-
-        if (angle > 90 || angle < -90) {
-            this.setFlipX(false)
-            this.weapon.setFlipY(true)
-            this.weapon.angle = angle
-        } else {
-            this.weapon.angle = angle
-            this.setFlipX(true)
-
-            this.weapon.setFlipY(false)
-        }
+        let angle = Math.floor(Phaser.Math.RadToDeg(Phaser.Math.Angle.BetweenPoints(new Phaser.Geom.Point(this.scene.input.x, this.scene.input.y), { x: this.weapon.x, y: this.weapon.y })))
 
 
 
         this.weapon.x = this.x + (this.flipX ? -20 : 20)
         this.weapon.y = this.y + 15
+
+
+        if (angle < 90 && angle > -90) {
+            if (angle > 65 && angle < 90) {
+                return
+            }
+
+            if (angle < -65 && angle > -90) {
+                return
+            }
+            this.weapon.angle = angle
+            this.setFlipX(true)
+
+            this.weapon.setFlipY(false)
+        } else {
+            if (angle < -90 && angle > -125) {
+                return
+            }
+
+            if (angle > 90 && angle < 125) {
+                return
+            }
+
+            this.setFlipX(false)
+            this.weapon.setFlipY(true)
+            this.weapon.angle = angle
+        }
+
+
+
+
 
 
 
@@ -297,12 +402,7 @@ class HumanEntity extends Phaser.Physics.Arcade.Image {
         this.control = true
         this.body.setVelocityX(this.speed)
         this.body.setBounceX(1)
-        this.setInteractive()
-        this.on('pointerdown', () => {
-            if (this.body.velocity.y === 0) {
-                this.body.setVelocityX(this.flipX ? this.speed : -this.speed)
-            }
-        })
+
 
 
     }
@@ -374,33 +474,51 @@ class SpaceshipEntity extends Phaser.Physics.Arcade.Sprite {
             duration: 4000,
             onComplete: () => {
 
-                setTimeout(() => { this.allowChock = true; this.attack() }, 1500)
+                setTimeout(() => {
+                    this.scene.physics.add.existing(this, true)
+
+                    this.setInteractive()
+                    this.scene.entities.add(this)
+                    this.scene.physics.add.collider(this.scene.bullets, this, (a: any, b: any) => {
+                        b.elem.destroy()
+                        let particles = this.scene.add.particles("flares")
+
+                        let emiter = particles.createEmitter({
+                            x: 500,
+                            y: 200,
+                            blendMode: "ADD",
+                            speed: { min: 0, max: 1000 },
+                            frequency: 3,
+                            lifespan: { min: 0, max: 100 },
+                            alpha: { start: 1, end: 0 },
+                            scale: { start: 0.2, end: 0 },
+
+
+                        })
+                        emiter.explode(200, b.x, b.y)
+                        b.destroy()
+                        if (!this.allowChock) return
+                        this.life -= 20
+                        this.scene.cameras.main.shake(200, 0.02)
+                        let chock = this.scene.add.image(Phaser.Math.Between(-1, 1) * Phaser.Math.Between(5, 15) * 5 + this.x, Phaser.Math.Between(-1, 1) * Phaser.Math.Between(5, 8) * 5 + this.y, "choc")
+                        chock.setDepth(10)
+                        let degatsSound = this.scene.sound.add("degats", { volume: 0.5 })
+                        degatsSound.play()
+                        setTimeout(() => {
+                            if (chock === undefined) return
+                            chock.destroy()
+                        }, 500)
+                        if (this.life < 0) {
+                            this.scene.heroes.data.set("kills", this.scene.heroes.data.values.kills + 1)
+                            this.stopAttack()
+                        }
+                    })
+                    this.allowChock = true; this.attack();
+                }, 1500)
             }
         })
 
-        this.scene.physics.add.existing(this, true)
 
-        this.setInteractive()
-        this.scene.entities.add(this)
-        this.scene.physics.add.collider(this.scene.bullets, this, (a: any, b: any) => {
-            b.elem.destroy()
-            b.destroy()
-            if (!this.allowChock) return
-            this.life -= 20
-            this.scene.cameras.main.shake(200, 0.02)
-            let chock = this.scene.add.image(Phaser.Math.Between(-1, 1) * Phaser.Math.Between(5, 15) * 5 + this.x, Phaser.Math.Between(-1, 1) * Phaser.Math.Between(5, 8) * 5 + this.y, "choc")
-            chock.setDepth(10)
-            let degatsSound = this.scene.sound.add("degats")
-            degatsSound.play()
-            setTimeout(() => {
-                if (chock === undefined) return
-                chock.destroy()
-            }, 500)
-            if (this.life < 0) {
-                this.scene.heroes.data.set("kills", this.scene.heroes.data.values.kills + 1)
-                this.stopAttack()
-            }
-        })
 
     }
 
@@ -451,6 +569,27 @@ class SpaceshipEntity extends Phaser.Physics.Arcade.Sprite {
 
         this.smoke.play("smoke-anim")
 
+        let particles = this.scene.add.particles("flares")
+
+        let emiter = particles.createEmitter({
+            x: 500,
+            y: 200,
+            blendMode: "ADD",
+            speed: { min: 0, max: 1200 },
+            frequency: 1,
+            lifespan: { min: 0, max: 1000 },
+            alpha: { start: 1, end: 0 },
+            scale: { start: 1, end: 0 },
+
+
+        })
+
+        emiter.explode(100, this.x, this.y)
+
+        this.destroy()
+        this.spaceLight.destroy()
+        return
+
         this.scene.tweens.add({
             targets: this,
             x: -1000,
@@ -475,7 +614,8 @@ export default class Play extends Phaser.Scene {
     rappedSpeed: number = 100
     shipDuration: number = 10
     heroes: HumanWarriorEntity
-    active : boolean
+    active: boolean
+    soundButton: any
 
     constructor() {
         super("play")
@@ -483,6 +623,7 @@ export default class Play extends Phaser.Scene {
     }
 
     createBackground(): void {
+
         this.add.image(0, 0, "starry_night").setOrigin(0).setDepth(0)
         this.add.image(0, config.height - 280, "building").setOrigin(0).setDepth(0)
         this.add.image(0, 482, "buisson1")
@@ -492,6 +633,17 @@ export default class Play extends Phaser.Scene {
         this.add.image(150, 460, "arbre1")
         this.add.image(800 - 100, 482, "buisson1")
         this.add.image(0, config.height - 95, "ground").setOrigin(0).setDepth(0)
+
+        this.soundButton = this.add.image(config.width - 30, config.height - 30, "son").setDisplaySize(40, 40)
+
+        this.soundButton.setDepth(192992929)
+
+        this.soundButton.setInteractive({ useHandCursor: true })
+
+        this.soundButton.on('pointerdown', () => {
+            this.sound.mute = !this.sound.mute
+        })
+
 
     }
 
@@ -515,7 +667,7 @@ export default class Play extends Phaser.Scene {
     }
 
     generateSpaceShip(): void {
- if (!this.active) return
+        if (!this.active) return
         let SpaceShipId = Math.floor(Math.random() * spaceShipColor.length)
         new SpaceshipEntity(this, Phaser.Math.Between(1, 7) * 100, 200, spaceShipColor[SpaceShipId])
         setTimeout(() => {
@@ -581,16 +733,17 @@ export default class Play extends Phaser.Scene {
     }
 
     create() {
+        this.input.setPollAlways();
         this.physics.world.setBounds(0, 0, config.width, config.height, true, true, true, true)
         this.ground = this.add.rectangle(0, config.height - 40, config.width, 100, 0xFF).setOrigin(0)
         this.playerGroup = this.physics.add.group()
         this.spaceLightGroup = this.physics.add.group()
         this.bullets = this.physics.add.group()
 
-        this.spaceShipConst =[5, 15]
-        this.humanConst =[5, 15]
-        this.rappedSpeed  = 100
-        this.shipDuration  = 10
+        this.spaceShipConst = [5, 15]
+        this.humanConst = [5, 15]
+        this.rappedSpeed = 100
+        this.shipDuration = 10
 
         bulletParticles = this.add.particles("flares")
         this.createBackground()
@@ -610,7 +763,17 @@ export default class Play extends Phaser.Scene {
         this.entities.runChildUpdate = true
         this.generateHuman()
 
-        this.heroes = new HumanWarriorEntity(this, 80, 200)
+        this.heroes = new HumanWarriorEntity(this, 80, 400)
+
+        this.heroes.alpha = 0
+
+        this.tweens.add({
+            targets: this.heroes,
+            alpha: 1,
+            duration: 500,
+            y: 410
+
+        })
 
 
 
@@ -659,5 +822,16 @@ export default class Play extends Phaser.Scene {
 
     update(time: number, delta: number): void {
         this.entities.preUpdate(time, delta)
+        if (this.sound.mute) this.soundButton.alpha = 0.2
+        else this.soundButton.alpha = 1
+    }
+}
+
+window.onresize = () => {
+    let canvas = document.querySelector('#game canvas')
+    console.log("canvas", canvas)
+    if (canvas) {
+        canvas.style.display = "none"
+        setTimeout(() => { canvas.style.display = "block" }, 300)
     }
 }

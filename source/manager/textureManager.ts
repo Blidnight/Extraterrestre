@@ -1,3 +1,7 @@
+// @ts-nocheck
+
+import * as Phaser from 'phaser/dist/phaser.min.js'
+
 const svgToDataurl = require('svg-to-dataurl')
 
 let human: any = null
@@ -5,7 +9,7 @@ let humanFromBehind: any = null
 let spaceship: any = null
 
 
-export default class EntityTexturemanager {
+export default class EntityTextureManager {
     scene: Phaser.Scene
 
     entity: number = 0
